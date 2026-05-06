@@ -50,7 +50,7 @@ Downstream projects mount this repo at **`.claude/skills/`** so [Claude Code](ht
 
 ```bash
 mkdir -p .claude
-git submodule add https://github.com/GrandGaleTech/gg-backend-skills-py.git .claude/skills
+git submodule add https://github.com/GrandGaleTechnologies/gg-backend-skills-py.git .claude/skills
 git submodule update --init --recursive
 ```
 
