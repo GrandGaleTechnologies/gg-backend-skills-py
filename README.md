@@ -46,11 +46,26 @@ Agents should load `SKILL.md` first and only pull a file from `references/` if i
 
 ## Consuming this repo as a submodule
 
-In a downstream project:
+Downstream projects mount this repo at **`.claude/skills/`** so [Claude Code](https://docs.claude.com/en/docs/claude-code/skills) auto-discovers every skill alongside any project-local skills.
 
 ```bash
-git submodule add https://github.com/GrandGaleTech/gg-backend-skills-py.git .skills
+mkdir -p .claude
+git submodule add https://github.com/GrandGaleTech/gg-backend-skills-py.git .claude/skills
 git submodule update --init --recursive
+```
+
+This lays out:
+
+```
+<project>/
+└── .claude/
+    └── skills/                    # ← this repo, as a submodule
+        ├── AGENTS.md
+        ├── skills.json
+        └── skills/
+            ├── grandpython/SKILL.md
+            ├── fastapi/SKILL.md
+            └── ...
 ```
 
 Add to your project's `AGENTS.md` (or `CLAUDE.md`, `.github/copilot-instructions.md`, etc.):
@@ -58,9 +73,10 @@ Add to your project's `AGENTS.md` (or `CLAUDE.md`, `.github/copilot-instructions
 ```markdown
 ## Skills
 
-This project consumes shared skills from `.skills/` (see `.skills/AGENTS.md`).
-Load any skill from `.skills/skills/<skill-name>/SKILL.md` when its trigger
-conditions match the task.
+This project consumes shared skills from `.claude/skills/` (see
+`.claude/skills/AGENTS.md`). Load any skill from
+`.claude/skills/skills/<skill-name>/SKILL.md` when its trigger conditions
+match the task.
 ```
 
 ### Pulling updates
@@ -68,8 +84,8 @@ conditions match the task.
 When this repo is updated upstream, downstream projects refresh with:
 
 ```bash
-git submodule update --remote --merge .skills
-git add .skills && git commit -m "chore(skills): bump gg-backend-skills-py"
+git submodule update --remote --merge .claude/skills
+git add .claude/skills && git commit -m "chore(skills): bump gg-backend-skills-py"
 ```
 
 Pin to a specific commit by checking out that SHA inside the submodule before committing.

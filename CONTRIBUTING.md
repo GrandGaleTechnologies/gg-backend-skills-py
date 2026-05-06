@@ -64,8 +64,8 @@ Examples:
 
 ## Releasing
 
-This repo uses commit SHAs as the unit of release — downstream submodules pin to a specific commit. There are no version tags. After merging changes to `main`, downstream projects can pull via:
+This repo uses commit SHAs as the unit of release — downstream submodules pin to a specific commit. There are no version tags. After merging changes to `main`, downstream projects (which mount this repo at `.claude/skills/`) pull via:
 
 ```bash
-git submodule update --remote --merge .skills
+git submodule update --remote --merge .claude/skills
 ```
