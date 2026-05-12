@@ -13,7 +13,7 @@ app/
 │   ├── formatters.py    # Serialization: model → response schema
 │   ├── models.py
 │   ├── selectors.py     # Read-only lookup functions (optional)
-│   ├── service.py
+│   ├── services.py
 │   ├── utils.py         # Module-scoped utility functions (optional)
 │   ├── routes/
 │   │   ├── __init__.py
@@ -33,12 +33,12 @@ app/
 |------|---------------|
 | `crud.py` | All DB operations: `get`, `get_all`, `create`, `update`, `delete`, and custom query methods |
 | `selectors.py` | Read-only lookup functions that wrap CRUD with optional `raise_exc`; called from routes and services |
-| `service.py` | Orchestration: multi-step business logic, external API calls, coordinating CRUD and selectors |
+| `services.py` | Orchestration: multi-step business logic, external API calls, coordinating CRUD and selectors |
 | `utils.py` | Module-scoped helpers that don't fit the above (no DB access, no orchestration) |
 
 ## Service vs Utility Functions
 
-`service.py` must only contain **service functions** (business logic that orchestrates operations, calls external APIs, or coordinates between subsystems). Direct database access must never appear in `service.py` — all DB operations must go through the module's **CRUD class**.
+`services.py` must only contain **service functions** (business logic that orchestrates operations, calls external APIs, or coordinates between subsystems). Direct database access must never appear in `services.py` — all DB operations must go through the module's **CRUD class**.
 
 Any function that does not fit that definition is a **utility function** and must live in:
 
@@ -51,7 +51,7 @@ Any function that does not fit that definition is a **utility function** and mus
 class BusinessCRUD(CRUDBase[models.Business]):
     pass
 
-# service.py — orchestration only, delegates DB work to CRUD
+# services.py — orchestration only, delegates DB work to CRUD
 async def create_business(data: schemas.BusinessCreate, db: AsyncSession) -> models.Business:
     """
     Create a new business
@@ -69,18 +69,18 @@ def build_business_display_name(name: str, suffix: str) -> str:
 
 **No:**
 ```python
-# service.py — wrong: direct DB access without CRUD
+# services.py — wrong: direct DB access without CRUD
 async def create_business(data: schemas.BusinessCreate, db: AsyncSession) -> models.Business:
     business = models.Business(**data.model_dump())  # wrong: direct model instantiation
     db.add(business)                                  # wrong: direct db.add
     await db.commit()                                 # wrong: direct db.commit
     return business
 
-# service.py — wrong: selector query without CRUD
+# services.py — wrong: selector query without CRUD
 async def get_business(business_id: uuid.UUID, db: AsyncSession):
     return await db.scalar(select(models.Business).where(...))  # wrong: raw SQLAlchemy in service
 
-# service.py — wrong: utility logic mixed in
+# services.py — wrong: utility logic mixed in
 def build_business_display_name(name: str, suffix: str) -> str:  # wrong: not a service function
     return f"{name.strip()} {suffix}".strip()
 ```
@@ -189,7 +189,7 @@ class BusinessCRUD(CRUDBase[models.Business]):
 Instantiate the CRUD class inside the service function, passing only `db`. Service functions always return model objects — never response schemas:
 
 ```python
-# app/businesses/service.py
+# app/businesses/services.py
 import logfire
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -259,8 +259,8 @@ Only accept a bare ID when the object is genuinely not available at the call sit
 
 ## Rules
 
-- Never call `db.add()`, `db.commit()`, `db.execute(select(...))`, or `db.delete()` directly in `service.py` or route files — always go through the CRUD class
+- Never call `db.add()`, `db.commit()`, `db.execute(select(...))`, or `db.delete()` directly in `services.py` or route files — always go through the CRUD class
 - Never reuse a CRUD instance across service functions; instantiate it fresh each time
-- Add custom query methods to the module CRUD class, not to `service.py`
+- Add custom query methods to the module CRUD class, not to `services.py`
 - If a query is needed across modules, add a method to that module's CRUD class and call it via aliased import
 - Pass model objects to service functions whenever the object is already in scope — avoid passing only an ID when the full object is available

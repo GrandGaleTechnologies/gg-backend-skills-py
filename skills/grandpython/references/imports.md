@@ -112,7 +112,7 @@ from app.contacts import service as contact_service
 When importing schemas from the **same module**, use named imports without aliases:
 
 ```python
-# In app/businesses/service.py
+# In app/businesses/services.py
 from app.businesses.schemas import create, base
 ```
 

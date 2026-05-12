@@ -76,9 +76,9 @@ DEFAULT_PAGE_SIZE = 20
 
 ## Module Structure
 
-Each module contains: `apis.py`, `crud.py`, `formatters.py`, `models.py`, `selectors.py` (optional), `service.py`, `utils.py` (optional), `routes/`, and `schemas/`.
+Each module contains: `apis.py`, `crud.py`, `formatters.py`, `models.py`, `selectors.py` (optional), `services.py`, `utils.py` (optional), `routes/`, and `schemas/`.
 
-Key rule: `service.py` contains **only orchestration logic** — no raw DB access, no utility functions. All DB operations go through the CRUD class. Read-only lookups with optional exception raising belong in `selectors.py`. Functions that don't orchestrate belong in `utils.py`.
+Key rule: `services.py` contains **only orchestration logic** — no raw DB access, no utility functions. All DB operations go through the CRUD class. Read-only lookups with optional exception raising belong in `selectors.py`. Functions that don't orchestrate belong in `utils.py`.
 
 [Full module layout, service vs utility distinction, and directory diagram](./references/module-structure.md)
 
@@ -90,7 +90,7 @@ Key rules:
 - Each module has `crud.py` with a class extending `CRUDBase` from `app/db/crud.py`
 - `__init__` hard-codes the model — callers only pass `db`
 - Instantiate fresh inside each service function; never reuse across calls
-- Never call `db.add()`, `db.commit()`, `db.execute()`, or `db.delete()` in `service.py` or routes
+- Never call `db.add()`, `db.commit()`, `db.execute()`, or `db.delete()` in `services.py` or routes
 - Pass model objects to service functions when already in scope — avoid re-fetching by ID
 
 [Full CRUD reference with CRUDBase definition, module classes, service function patterns, and pass-objects rule](./references/module-structure.md)
@@ -105,7 +105,7 @@ Key rules:
 - **CRUD only** — never call `db.execute()` directly; complex queries go as custom methods on the CRUD class
 - **Read-only** — never write to the database
 - **No auth deps** — `get_current_user` belongs in `dependencies.py`, not selectors
-- **No business logic** — orchestration belongs in `service.py`
+- **No business logic** — orchestration belongs in `services.py`
 - Called from routes (to resolve path params) and service functions (as precondition checks)
 - Wrap calls with `raise_exc=True` (default) in `cast(Model, await selectors.get_...())` for type narrowing and IDE autocomplete
 - Cross-module: import as `from app.{module} import selectors as {alias}_selectors`

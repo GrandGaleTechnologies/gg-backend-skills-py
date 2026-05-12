@@ -205,7 +205,7 @@ from app.contacts.selectors import get_contact_by_id  # wrong: direct import acr
 
 - **Read-only only** — selectors never write to the database
 - **CRUD always** — never call `db.execute()` directly; complex queries go as custom CRUD class methods
-- **No business logic** — orchestration belongs in `service.py`
+- **No business logic** — orchestration belongs in `services.py`
 - **No auth dependencies** — `get_current_user` and WebSocket auth functions belong in `dependencies.py`
 - **No utility logic** — helpers without DB access belong in `utils.py`
 - **`cast()` always** — wrap every `raise_exc=True` call site with `cast(Model, await ...)`
@@ -218,7 +218,7 @@ from app.contacts.selectors import get_contact_by_id  # wrong: direct import acr
 | What | Where it belongs |
 |------|-----------------|
 | `get_current_user()` / `get_current_user_ws()` | `dependencies.py` + `annotations.py` |
-| Writing / updating records | `service.py` via CRUD |
-| Business logic orchestration | `service.py` |
+| Writing / updating records | `services.py` via CRUD |
+| Business logic orchestration | `services.py` |
 | Raw `db.execute()` queries | Custom method in `crud.py` |
 | Utility / transformation functions | `utils.py` |
